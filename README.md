@@ -3,7 +3,7 @@
     <img src="preview_images/qanda_logo.png">
 </div>
 
-## NodeJS Express Web Dashboard to view Q&A transcripts & statistics between 2008-2018
+## NodeJS Express Web Dashboard to display Q&A transcripts & statistics between 2008-2018
 
 This project started as my assignment submission for a data visualization unit at Monash University. The choice of tools and libraries is somewhat haphazard, as they were included based on what I was learning at the time to assist with my studies.
 
@@ -14,10 +14,14 @@ Search to see what your representatives have said in the past. How consistent ha
 ## Features:
 
 - Beautified transcript layout (put a face to the speaker's name), search through the episode archive.
-- See Word-Clouds for each episode. 
-- Browse panelists; see their bio, appearance list, and search for individual quotes (and see the context in which they said them through transcript position linking).
+- See word-clouds for each episode. 
+- Browse panelists; see their bio, appearance list, and search for individual quotes (and see the context in which they were said through transcript position linking).
 - See staistics summaries regarding political representation of the audience, and gender representation of both audience and panel (via tableau).
-- Observe trends of word usage through the years and months of broadcasts.
+- Observe trends of word usage throughout the years and months of broadcasts.
+
+## Usage:
+- ```npm install```
+- ```node server.js``` to start the express server, then visit localhost:8081/qanda.html
 
 ## Screenshots:
 
