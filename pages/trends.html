@@ -1,0 +1,213 @@
+<h1>Trends</h1>
+<p>
+    Q&A might not be a perfect representation of the 'national discussion' (being filmed predominately in Melbourne
+    and Sydney), but in general the topics discussed are usually a reflection of contemporary political developments and societal issues.
+    Search for key terms and observe the trends in mention rate across the past decade.
+</p>
+<hr/>
+
+<style>
+    path {
+        stroke: darkred;
+        stroke-width: 3px;
+        fill: none;
+    }
+    .axis path,
+    .axis line {
+        fill: none;
+        stroke: grey;
+        stroke-width: 1px;
+        shape-rendering: crispEdges;
+    }
+
+    .x.label,
+    .y.label {
+        font-weight: bolder;
+    }
+</style>
+
+<h2 id="txtTerm"></h2>
+<div align="right">
+    <table class="shadow p-3 mb-5 bg-white rounded" cellpadding="10">
+        <tr>
+            <td align="center" style="padding-right: 20px">Monthly</td>
+            <td><div style="width: 200px" id="sliderBin"></div></td>
+            <td align="center" style="padding-left: 20px">Yearly</td>
+        </tr>
+    </table>
+</div>
+
+<div style="text-align: center" style="width:100%">
+    <div id="hist" style="width: 50vw; height: 50vh; display: inline"></div>
+</div>
+
+<br />
+
+<div class="card">
+    <div class="card-header">
+        <h5>Search</h5>
+    </div>
+    <div class="card-body">
+        <input id="inpSearch" class="form-control" placeholder="e.g. Tax" style="width: 50%; display: inline">
+        <button id="btnTrend" style="display: inline" type="button" class="btn btn-success">Submit</button>
+        <br />
+        <input type="checkbox" id="checkPartial"><p style="display: inline"> Partial matches included</p>
+        <br />
+        <span class="error text-danger" id="txtWarn"></span>
+    </div>
+</div>
+
+
+<script>
+    function refresh() {
+
+    }
+
+    function enter() {
+        $('#txtWarn').hide();
+
+        // Object.values not standard across all browsers
+        const values = (dict) => Object.keys(dict).map(k => dict[k]);
+
+        // bin granularity for date results
+        let monthlyBin = (date) => date.split('/').slice(1).join('/');
+        let yearlyBin = (date) => date.split('/').slice(2).join('/');
+        let binMethod = yearlyBin;
+
+        // results for matches, {date, count}
+        let results = null;
+
+        // refresh display using results
+        const refresh = () => {
+            // ensure user has received results (performed at search)
+            if(!results)
+                return;
+            
+            // process results into bins
+            let processedResults = results.reduce((bins, ep) => {
+                const bin = binMethod(ep.date);
+                if(!(bin in bins))
+                    bins[bin] = [];
+                bins[bin].push(ep);
+                return bins;
+            }, {});
+            processedResults = values(processedResults).map(bin => ({date: binMethod(bin[0].date), count : bin.reduce((count, ep) => count + ep.count, 0)}));
+
+            var margin = {top: 30, right: 20, bottom: 30, left: 50},
+                width = $('#hist').width() - margin.left - margin.right,
+                height = $('#hist').height() - margin.top - margin.bottom;
+     
+            var parseDate = d3.time.format(binMethod("%d/%m/%y")).parse;
+
+            var x = d3.time.scale().range([0, width]);
+            var y = d3.scale.linear().range([height, 0]);
+
+            var xAxis = d3.svg.axis().scale(x)
+                .orient("bottom").ticks(10);
+
+            var yAxis = d3.svg.axis().scale(y)
+                .orient("left").ticks(10);
+
+            var valueline = d3.svg.line()
+                .x(function (d) {
+                    return x(d.date);
+                })
+                .y(function (d) {
+                    return y(d.count);
+                });
+
+            $('#hist').empty();
+            var svg = d3.select("#hist")
+                .append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            // convert date to datetime
+            processedResults.forEach(function (d) {
+                d.date = parseDate(d.date);
+                d.count = +d.count;
+            });
+            // sort results by date
+            processedResults = processedResults.sort((a, b) => a.date - b.date);
+
+            x.domain(d3.extent(processedResults, function (d) {return d.date;}));
+            y.domain([0, d3.max(processedResults, function (d) {return d.count;})]);
+
+            svg.append("path")
+                .attr("class", "line")
+                .attr("d", valueline(processedResults));
+
+            svg.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + height + ")")
+                .call(xAxis);
+
+            svg.append("g")
+                .attr("class", "y axis")
+                .call(yAxis);
+
+            svg.append("text")
+                .attr("class", "x label")
+                .attr("text-anchor", "end")
+                .attr("x", width)
+                .attr("y", height + margin.bottom)
+                .text("Period");
+
+            svg.append("text")
+                .attr("class", "y label")
+                .attr("text-anchor", "middle")
+                .attr("x", 0)
+                .attr("y", -10)
+                .text("Frequency");
+        };
+
+        // request results for pattern
+        const getResults = () => {
+            const pat = $('#inpSearch').val().trim();
+
+            // ensure pattern length >=3
+            if(pat.length < 3) {
+                $('#txtWarn').text("Error, please enter a search term with at least three characters.").show();
+                return;
+            } else
+                $('#txtWarn').hide();
+
+            // request results
+            socket.emit('getTrend',  $('#checkPartial').is(':checked') ? pat : (' ' + pat + ' '));
+            socket.on('getTrend', (data) => {
+                // ensure pattern has at least some matches
+                if (data.every(ep => ep.count === 0)) {
+                    $('#txtWarn').text("No results, try another term.").show();
+                    return;
+                }
+                // set results and refresh
+                results = data;
+                $('#txtTerm').text("Search: "  +pat);
+                refresh();
+            });
+        };
+
+        // have bin slider refresh graph
+        $('#sliderBin').slider({
+            min:0,
+            max:1,
+            value: 1,
+            slide: function(event, ui) {
+                binMethod = ui.value === 0 ? monthlyBin : yearlyBin;
+                refresh();
+            }
+        });
+        // have button request results
+        $('#btnTrend').on('click', () => getResults());
+        // have input-enter do the same
+        $('#inpSearch').keyup(function(e){ if(e.keyCode === 13) getResults()});
+
+        pageReady();
+    }
+
+    function exit() {
+
+    }
+</script>

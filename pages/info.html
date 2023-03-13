@@ -1,0 +1,192 @@
+<br/>
+
+<!-- Panelist name -->
+<h1 id="panelistName">NAME</h1>
+<hr/>
+
+<table style="width: 100%;" cellpadding="5px">
+    <tr>
+        <!-- Profile picture -->
+        <td style="width: 20%; vertical-align: top">
+            <img id="panelistImg" style="width: 100%; box-shadow: 5px 5px 5px #999" onerror="this.src='nophoto.png'"/>
+        </td>
+        <!-- Info sections -->
+        <td style="vertical-align: top">
+            <div id="accordion">
+                <!-- Biography -->
+                <div class="card">
+                    <div class="card-header" id="headingThree">
+                        <h5 class="mb-0">
+                            <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseThree"
+                                    aria-expanded="false" aria-controls="collapseThree">Bio
+                            </button>
+                        </h5>
+                    </div>
+                    <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordion">
+                        <div class="card-body">
+                            <p id="panelistDesc" style="margin: 10px; white-space: pre-line "></p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Appearance list -->
+                <div class="card">
+                    <div class="card-header" id="headingOne">
+                        <h5 class="mb-0">
+                            <button class="btn btn-link" data-toggle="collapse" data-target="#collapseOne"
+                                    aria-expanded="true" aria-controls="collapseOne">Appearances
+                            </button>
+                        </h5>
+                    </div>
+                    <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
+                        <div align="center">
+                            <br/>
+                            <h3 id="panelcountTxt" align="center"></h3>
+                            <div class="card-body list-group" id="panelistDates" style="width: 80%"></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Quote search -->
+                <div class="card">
+                    <div class="card-header" id="headingTwo">
+                        <h5 class="mb-0">
+                            <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseTwo"
+                                    aria-expanded="false" aria-controls="collapseTwo">Search
+                            </button>
+                        </h5>
+                    </div>
+                    <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordion">
+                        <div class="card-body">
+                            <!-- Quote search input -->
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Quote search</h5>
+                                </div>
+                                <div class="card-body">
+                                    <table>
+                                        <tr>
+                                            <td style="width: 100%"><input id="inpQuote" class="search form-control" placeholder=""/></td>
+                                            <td><button id="btnQuoteSearch" type="button" class="btn btn-outline-primary">Search</button></td>
+                                        </tr>
+                                        <tr>
+                                            <td></td>
+                                            <td><button id="btnSearchShare" type="button" class="btn btn-outline-light btn-sm btn-copy"><table><tr><td>Get link</td><td><div class="icoLink"></div></td></tr></table></button></td>
+                                        </tr>
+                                    </table>
+                                    <span id="txtWarn" class="error text-danger">Error, please enter a search term with at least three characters.</span>
+                                </div>
+                            </div>
+                            <br/>
+                            <h3 id="quotecountTxt" align="center"></h3>
+                            <br/>
+
+                            <!-- Quote search results -->
+                            <template id="tmpSearch">
+                                {{#each messages}}
+                                <div class="shadow p-3 mb-5 bg-white rounded">
+                                    <h5>{{date}}</h5>
+                                    <p>{{#highlight}}{{content}}{{/highlight}}</p>
+                                    <div align="right">
+                                        <button class="btn btn-outline-light btn-sm btn-copy" type="button" data-date="{{date}}" data-id="{{ID}}"><table><tr><td>Go to quote</td><td><div class="icoExternal"></div></td></tr></table></button>
+                                    </div>
+                                </div>
+                                {{/each}}
+                            </template>
+                            <div id="lstQuotes"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<br/>
+
+<script>
+    $('#txtWarn').hide();
+
+    function refresh() {
+        // if search parameter included, apply
+        const search = decodeURIComponent(getQuery('search'));
+        if(search != 'null') {
+            $('#inpQuote').val(search);
+            $('#btnQuoteSearch').trigger('click');
+            $('#collapseTwo').addClass('show');
+        }
+    }
+    function exit() {
+        socket.off('getPanelist');
+        socket.off('getPanelistEps');
+    }
+    function enter(){
+        allowBack();
+        const panelistName = getQuery('panelist').replace(/_/g, ' ');
+
+        // show modal pop-up for link sharing
+        $('#btnSearchShare').on('click', () => {
+            $('#modalLink').modal();
+            $('#modalLinkUrl').val(window.location.href.split('&search')[0] + '&search=' + encodeURIComponent($('#inpQuote').val()));
+        });
+
+        // request panelist details from server
+        socket.emit('getPanelist', panelistName);
+        socket.on('getPanelist', panelist => {
+            const detail = panelist.details, quotes = panelist.quotes;
+            // display name
+            $('#panelistName').text(detail.name);
+            // display appearances and appearance count
+            $('#panelcountTxt').text('Appearance count: ' + detail.dates.length);
+            $('#panelistDates').html(detail.dates.map(date => '<a href="' + '?section=transcript&ep=' + date + '" class="list-group-item">' + date + '</a>'));
+            // display panelist description
+            $('#panelistDesc').text(detail.desc);
+            // display panelist image
+            $('#panelistImg').prop('src', 'imgs/' + detail.name.replace('_', ' ')+'.jpg');
+            // finished display, page ready
+            pageReady();
+
+            const updateList = () => {
+                // remove old results
+                $('#txtWarn').hide();
+                $('#lstQuotes').empty();
+                $('#quotecountTxt').hide();
+                const pat = $('#inpQuote').val();
+                if(pat.length < 3) {
+                    $('#txtWarn').show();
+                    return;
+                }
+
+                // construct results contents
+                Handlebars.registerHelper('highlight', function(options) {
+                    let txt = options.fn(this);
+                    let pat = $('#inpQuote').val();
+                    let index = 0;
+                    let str = "";
+                    while(true) {
+                        const nextIndex = txt.toUpperCase().indexOf(pat.toUpperCase(), index);
+                        if(nextIndex === -1)
+                            break;
+                        str += txt.substring(index, nextIndex) + '<b>'+txt.substring(nextIndex, nextIndex + pat.length)+'</b>';
+                        index = nextIndex + pat.length;
+                    }
+                    str += txt.substring(index);
+                    return str;
+                });
+                $('#lstQuotes').html(Handlebars.compile($('#tmpSearch').html())({messages : quotes.filter(quote => quote.content.toUpperCase().includes(pat.toUpperCase()))}));
+                $('#lstQuotes button').each(function() {
+                    $(this).on('click', () => {
+                        const win = window.open('?section=transcript&ep='+$(this).attr('data-date')+'&msg=msg'+$(this).attr('data-id'), '_blank');
+                        if(win)
+                            win.focus();
+                    });
+                });
+                // set result count
+                $('#quotecountTxt').text('Result count: ' + $('#lstQuotes').children().length).show();
+            };
+
+            // have both search button and enter on input apply search
+            $('#inpQuote').keyup(function(e){ if(e.keyCode === 13) updateList()});
+            $('#btnQuoteSearch').on("click", updateList);
+            refresh();
+        });
+    }
+</script>

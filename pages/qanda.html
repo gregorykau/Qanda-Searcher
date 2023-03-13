@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<head>
+    <title>Q&A - Interactive</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+    <script src="http://mistic100.github.io/jQCloud/dist/jqcloud2/dist/jqcloud.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.slim.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/1.5.0/list.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/3.0.3/handlebars.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" />
+    <link rel="stylesheet" type="text/css" href="http://mistic100.github.io/jQCloud/dist/jqcloud2/dist/jqcloud.min.css" />
+    <link rel="stylesheet" type="text/css" href="global.css" />
+</head>
+
+<style>
+    .toptitle {
+        color:white; font-family: Bookman Old Style;
+    }
+</style>
+
+<body style="background-color: black; height: 100%">
+
+<div style="width: 100%; position: relative; height: auto; min-height: 100%">
+    <div style="background-color: gray; color: white; width: 100%; height: 25px" align="center"><p>Unofficial interactive Q&A website. The ABC's official website is <a href="https://www.abc.net.au/tv/qanda/">https://www.abc.net.au/tv/qanda/</a></p></div>
+
+    <img src="abstract_topleft.jpg" style="position: absolute; left: 0; top: 0; width: 30vw; height: 30vw; z-index: -1" />
+    <img src="abstract_bottomright.jpg" style="position: absolute; right: 0; bottom: 0; width: 30vw; height: 30vw; z-index: -1;" />
+
+    <div style="left: 15%; width: 70%; position: relative;">
+        <table style="width: 100%" align="center">
+            <tr>
+                <td>
+                    <img src="logo.png" style="width: 15vw;"/> <br />
+                </td>
+                <td style="text-align: center">
+                    <h1 class="toptitle">An exercise in web scraping and processing</h1>
+                </td>
+            </tr>
+        </table>
+
+        <hr style="border-color: white" /><br />
+
+        <table cellpadding="5px" style="width: 100%;">
+            <tr>
+                <td style="width: 20%; vertical-align: top">
+                    <div style="background-color: white; padding: 2px;">
+                        <button type="button" class="btn btn-lg btn-light btn-menu" style="width: 100%" data-section="home">Home</button> <br />
+                        <button type="button" class="btn btn-lg btn-light btn-menu" style="width: 100%" data-section="episodes">Episodes</button> <br />
+                        <button type="button" class="btn btn-lg btn-light btn-menu" style="width: 100%" data-section="panel">Panelists</button> <br />
+                        <button type="button" class="btn btn-lg btn-light btn-menu" style="width: 100%" data-section="statistics">Statistics</button> <br />
+                        <button type="button" class="btn btn-lg btn-light btn-menu" style="width: 100%" data-section="trends">Trends</button> <br />
+                        <button type="button" class="btn btn-lg btn-light btn-menu" style="width: 100%" data-section="contact">Contact</button> <br />
+                    </div>
+                </td>
+                <td style="width: 80%; vertical-align: top">
+                    <div style="position: relative" id="divContentContainer">
+                        <button id="btnBack" style="position: absolute; top: 0; left: 0" type="button" class="btn btn-light" onclick="window.history.back()"><div class="icoLeft"></div></button>
+                        <div style="background-color: white; padding: 20px;" id="divContent">
+                            <h3></h3>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+        <br />
+    </div>
+    <br />
+    <div style="text-align: center; color: white; background-color: gray; width: 100%; height: 30px; overflow-y: hidden; position: absolute; bottom: 0">
+        <p>The transcript scraper was created by Kian Gregory, and the source for this project is available at the
+        <a href="https://github.com/kjgre10/iqanda" target="_blank">GitHub repository.</a>
+        </p>
+    </div>
+</div>
+
+<div class="modal fade" id="modalLink" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Quote link</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input style="width: 100%" type="text" value="URL" readonly id="modalLinkUrl">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="jnav.js"></script>
+</body>

@@ -1,0 +1,49 @@
+<h1>Panelists</h1>
+<p>Search through the 100's of panelists that have appeared on the show across its 10 year history. Each panelist
+has an explorable profile with appearance list, bio and quote searcher.</p>
+<hr />
+
+<div class="card">
+    <div class="card-header">
+        <h5>Search name</h5>
+    </div>
+    <div class="card-body">
+        <input id="searchInput" class="form-control" placeholder="e.g. Malcolm Turnbull" style="width: 50%" />
+    </div>
+</div>
+
+<br />
+
+<div id="divPanelists" style="width: 100%; height: 50vh">
+    <div class="list" style="width: 100%; height: 90%; overflow-y: scroll"></div>
+</div>
+
+<script>
+    function refresh() {
+
+    }
+    function exit() {
+        socket.off('getPanelists');
+    }
+    function enter() {
+        const userList = new List('divPanelists', {
+            valueNames: ['name'],
+            item: '<button type="button" class="btn btn-outline-dark" style="width: 100%; text-align: center">' +
+                '<h5 class="card-title name"></h5>' +
+                '</button>'
+        }, []);
+        socket.emit('getPanelists');
+        socket.on('getPanelists', panelists => {
+            userList.add(panelists.map(panelist => ({name : panelist})));
+            $('#divPanelists .list > button').each(function() {
+                $(this).on('click', () => {
+                    const name = $(this).text().replace(' ', '_');
+                    pushState(null,  null, '?section=info&panelist=' + name);
+                });
+            });
+            userList.sort('name');
+            $('#searchInput').on("input propertychange", function(){userList.search($(this).val());});
+            pageReady();
+        });
+    }
+</script>

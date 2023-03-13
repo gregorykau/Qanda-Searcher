@@ -1,0 +1,38 @@
+html {overflow-y: scroll; height: 100%;}
+body {background-color: black; height: 100%;}
+
+.modal-open[style] {
+    padding-right: 0px !important;
+}
+
+.icoLink {
+    width: 15px;
+    height: 15px;
+    background-size: cover;
+    background-image: url(svg/link.svg);
+    background-repeat: no-repeat;
+}
+
+.icoExternal {
+    width: 30px;
+    height: 40px;
+    background-size: cover;
+    background-image: url(svg/link-external.svg);
+    background-repeat: no-repeat;
+}
+
+.icoLeft {
+    width: 30px;
+    height: 40px;
+    background-size: cover;
+    background-image: url(svg/arrow-left.svg);
+    background-repeat: no-repeat;
+}
+
+.icoBack {
+    width: 30px;
+    height: 40px;
+    background-size: cover;
+    background-image: url(svg/arrow-left.svg);
+    background-repeat: no-repeat;
+}

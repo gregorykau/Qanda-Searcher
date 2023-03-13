@@ -1,0 +1,47 @@
+<style>
+    .statCollection li {
+        font-size: 30px;
+    }
+</style>
+
+<h1>Statistics</h1>
+<p>
+    While these generated statics may not be able to speak directly to causation, the figures nonetheless provide an
+    interesting insight into the shows reflection of Australian society.
+</p>
+<hr />
+
+<ol class="statCollection">
+    <li>
+        <h3>Political representation</h3>
+        <div class='tableau' id='viz1543104814583' style='position: relative'><noscript><a href='#'><img alt=' ' src='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;qa&#47;qanda_audience&#47;Sheet1&#47;1_rss.png' style='border: none' /></a></noscript><object class='tableauViz'  style='display:none;'><param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' /> <param name='embed_code_version' value='3' /> <param name='site_root' value='' /><param name='name' value='qanda_audience&#47;Sheet1' /><param name='tabs' value='no' /><param name='toolbar' value='yes' /><param name='static_image' value='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;qa&#47;qanda_audience&#47;Sheet1&#47;1.png' /> <param name='animate_transition' value='yes' /><param name='display_static_image' value='yes' /><param name='display_spinner' value='yes' /><param name='display_overlay' value='yes' /><param name='display_count' value='yes' /><param name='filter' value='publish=yes' /></object></div>
+    </li>
+    <li>
+        <h3>Gender representation</h3>
+        <div class='tableau' id='viz1542255162406' style='position: relative'><noscript><a href='#'><img alt=' ' src='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;qa&#47;qanda_gender&#47;Grid&#47;1_rss.png' style='border: none' /></a></noscript><object class='tableauViz'  style='display:none;'><param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' /> <param name='embed_code_version' value='3' /> <param name='site_root' value='' /><param name='name' value='qanda_gender&#47;Grid' /><param name='tabs' value='no' /><param name='toolbar' value='yes' /><param name='static_image' value='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;qa&#47;qanda_gender&#47;Grid&#47;1.png' /> <param name='animate_transition' value='yes' /><param name='display_static_image' value='yes' /><param name='display_spinner' value='yes' /><param name='display_overlay' value='yes' /><param name='display_count' value='yes' /><param name='filter' value='publish=yes' /></object></div>
+    </li>
+</ol>
+<p><i>*It must be noted that gender classification based on limited name matching is prone to a degree of error</i></p>
+
+
+<br />
+
+<script>
+    function refresh() {
+
+    }
+    function exit() {
+
+    }
+    function enter(){
+        // once page faded in, execute code to set-up embedded tableau visualizations
+        pageReady(() => {
+            {
+                var divElement = document.getElementById('viz1542255162406');                    var vizElement = divElement.getElementsByTagName('object')[0];                    vizElement.style.width='100%';vizElement.style.height=(divElement.offsetWidth*0.75)+'px';                    var scriptElement = document.createElement('script');                    scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';                    vizElement.parentNode.insertBefore(scriptElement, vizElement);
+            }
+            {
+                var divElement = document.getElementById('viz1543104814583');                    var vizElement = divElement.getElementsByTagName('object')[0];                    vizElement.style.width='100%';vizElement.style.height=(divElement.offsetWidth*0.75)+'px';                    var scriptElement = document.createElement('script');                    scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';                    vizElement.parentNode.insertBefore(scriptElement, vizElement);
+            }
+        });
+    }
+</script>

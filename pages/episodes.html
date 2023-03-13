@@ -1,0 +1,75 @@
+<link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" />
+
+<h1>Episodes</h1>
+<p>
+    Browse the episode entries and discover the panelists, word-clouds and reformatted transcripts.
+</p>
+<hr />
+
+<div class="card">
+    <div class="card-header"><h5>Browse by date</h5></div>
+    <div class="card-body">
+        <form action="#">
+            <fieldset>
+                <label for="year">Year</label>
+                <select name="year" id="year">
+                </select>
+                <br />
+                <label for="month">Month</label>
+                <select name="month" id="month"></select>
+            </fieldset>
+        </form>
+    </div>
+</div>
+
+<br />
+
+<div id="divEps" style="width: 100%">
+    <div class="list" style="width: 100%">
+    </div>
+</div>
+
+<script>
+    function refresh() {
+        $('#year').val(getQuery('year') || '2018'); $('#year').selectmenu('refresh');
+        $('#month').val(getQuery('month') || 'All'); $('#month').selectmenu('refresh');
+        const dateSearch = '/' + ($('#month').prop('selectedIndex') ? $('#month').prop('selectedIndex') + '/' : '') + $('#year').val().slice(2);
+        socket.emit('getEpisodes', dateSearch);
+    }
+    function exit(){
+        socket.off('getEpisodes');
+    }
+    function enter(){
+        $('#month').append(['All', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September',
+            'October', 'November', 'December'].reduce((t, m) => t + '<option>' + m + '</option>', ''));
+        $('#year').append(['2009', '2010', '2011', '2012', '2013', '2014', '2015', '2016', '2017', '2018'].reduce((t, m) => t + '<option>' + m + '</option>', ''));
+        $("#month").selectmenu();
+        $("#year").selectmenu();
+
+        const refreshDates = () => pushState(null, null, '?section=episodes&year='+$('#year').val()+ '&month=' + $('#month').val());
+        $('#month').on('selectmenuchange', () => refreshDates());
+        $('#year').on('selectmenuchange', () => refreshDates());
+
+        refresh();
+
+        const userList = new List('divEps', {
+            valueNames: ['date', 'title'],
+            item: '<button type="button" class="btn btn-outline-dark" style="width: 100%; text-align: left">' +
+                '<h5 class="card-title title"></h5>' +
+                '<p><small class="text-muted date"></small></p>' +
+                '</button>'
+        }, []);
+
+        socket.on('getEpisodes', (data) => {
+            userList.clear();
+            userList.add(data.eps);
+            $('#divEps .list > button').each(function() {
+                $(this).on('click', () => {
+                    const date = $(this).find('.date').text();
+                    pushState(null,  null, '?section=transcript&ep=' + date);
+                });
+            });
+            pageReady();
+        });
+    }
+</script>
