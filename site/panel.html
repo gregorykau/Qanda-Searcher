@@ -23,7 +23,7 @@ has an explorable profile with appearance list, bio and quote searcher.</p>
 
     }
     function exit() {
-        socket.off('getPanelists');
+        
     }
     function enter() {
         const userList = new List('divPanelists', {
@@ -32,18 +32,18 @@ has an explorable profile with appearance list, bio and quote searcher.</p>
                 '<h5 class="card-title name"></h5>' +
                 '</button>'
         }, []);
-        socket.emit('getPanelists');
-        socket.on('getPanelists', panelists => {
-            userList.add(panelists.map(panelist => ({name : panelist})));
-            $('#divPanelists .list > button').each(function() {
-                $(this).on('click', () => {
-                    const name = $(this).text().replace(' ', '_');
-                    pushState(null,  null, '?section=info&panelist=' + name);
-                });
+
+        const panelists = Object.keys(JSONDATA.panelists);
+
+        userList.add(panelists.map(panelist => ({name : panelist})));
+        $('#divPanelists .list > button').each(function() {
+            $(this).on('click', () => {
+                const name = $(this).text().replace(' ', '_');
+                pushState(null,  null, '?section=info&panelist=' + name);
             });
-            userList.sort('name');
-            $('#searchInput').on("input propertychange", function(){userList.search($(this).val());});
-            pageReady();
         });
+        userList.sort('name');
+        $('#searchInput').on("input propertychange", function(){userList.search($(this).val());});
+        pageReady();
     }
 </script>

@@ -1,8 +1,39 @@
+$.ajaxSetup({
+    cache: false
+});
 $('#divContentContainer').hide();
 $('#btnBack').hide();
 
+class LoadingOverlay {
+    constructor() {
+        this.loadingDiv = $(`
+            <div style="display: none; color: white; position: fixed; left: 50vw; top: 50vh; transform: translate(-50%, -50%); z-index: 9999;">
+                <h1>Loading Dataset...</h1>
+            </div>
+        `).prependTo('body');
+    }
+    static getInstance() { return this.instance; }
+    startLoading() {
+        this.pendingCount++;
+        setTimeout(() => { if (this.pendingCount > 0)
+            this.loadingDiv.fadeIn('fast'); }, 0);
+    }
+    endLoading() {
+        console.assert(this.pendingCount >= 0);
+        this.pendingCount--;
+        setTimeout(() => { if (this.pendingCount == 0)
+            this.loadingDiv.fadeOut('fast'); }, 0);
+    }
+    static instance = new LoadingOverlay();
+    loadingDiv;
+    pendingCount = 0;
+}
+
 const FADE_SPEED = 500;
-const socket = io.connect();
+
+// global vars
+let JSONDATA = null;
+let EPISODE_TEXT = null;
 
 function exit(){
 }
@@ -55,7 +86,7 @@ function pushState (data, title, state) {
     navigate();
 }
 
-(() => {
+(async () => {
     $(document).on('click', 'a', function() {
         pushState(null, null, $(this).attr('href'));
         return false;
@@ -66,5 +97,18 @@ function pushState (data, title, state) {
             pushState(null,  null, '?section=' + $(this).attr('data-section'));
         });
     });
+
+    LoadingOverlay.getInstance().startLoading();
+
+    await new Promise((resolve) => {
+        $.getJSON("JSON/qanda.json", (data) => {
+            JSONDATA = data;
+            EPISODE_TEXT = Object.values(JSONDATA.entries).map(entry => ({date: entry.date, txt: Object.values(entry.messages).reduce((t, msg) => t + ' ' + msg.content.toUpperCase(), '')}));
+            resolve();
+        });
+    });
+
+    LoadingOverlay.getInstance().endLoading();
+
     navigate();
 })();

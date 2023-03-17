@@ -115,8 +115,7 @@
         }
     }
     function exit() {
-        socket.off('getPanelist');
-        socket.off('getPanelistEps');
+
     }
     function enter(){
         allowBack();
@@ -128,65 +127,74 @@
             $('#modalLinkUrl').val(window.location.href.split('&search')[0] + '&search=' + encodeURIComponent($('#inpQuote').val()));
         });
 
-        // request panelist details from server
-        socket.emit('getPanelist', panelistName);
-        socket.on('getPanelist', panelist => {
-            const detail = panelist.details, quotes = panelist.quotes;
-            // display name
-            $('#panelistName').text(detail.name);
-            // display appearances and appearance count
-            $('#panelcountTxt').text('Appearance count: ' + detail.dates.length);
-            $('#panelistDates').html(detail.dates.map(date => '<a href="' + '?section=transcript&ep=' + date + '" class="list-group-item">' + date + '</a>'));
-            // display panelist description
-            $('#panelistDesc').text(detail.desc);
-            // display panelist image
-            $('#panelistImg').prop('src', 'imgs/' + detail.name.replace('_', ' ')+'.jpg');
-            // finished display, page ready
-            pageReady();
+        const detail = JSONDATA.panelists[panelistName];
+        const quotes = detail.dates.reduce((messages, date) => {
+            const messageIds = JSONDATA.entries[date].speakers[panelistName].responses;
+            messageIds.forEach((messageID => {
+                const message = JSONDATA.entries[date].messages[messageID];
+                messages.push({
+                    'content': message.content,
+                    'date': date,
+                    'ID': message.ID
+                })
+            }));
+            return messages;
+        }, []);
 
-            const updateList = () => {
-                // remove old results
-                $('#txtWarn').hide();
-                $('#lstQuotes').empty();
-                $('#quotecountTxt').hide();
-                const pat = $('#inpQuote').val();
-                if(pat.length < 3) {
-                    $('#txtWarn').show();
-                    return;
+        // display name
+        $('#panelistName').text(detail.name);
+        // display appearances and appearance count
+        $('#panelcountTxt').text('Appearance count: ' + detail.dates.length);
+        $('#panelistDates').html(detail.dates.map(date => '<a href="' + '?section=transcript&ep=' + date + '" class="list-group-item">' + date + '</a>'));
+        // display panelist description
+        $('#panelistDesc').text(detail.desc);
+        // display panelist image
+        $('#panelistImg').prop('src', 'imgs/' + detail.name.replace('_', ' ')+'.jpg');
+        // finished display, page ready
+        pageReady();
+
+        const updateList = () => {
+            // remove old results
+            $('#txtWarn').hide();
+            $('#lstQuotes').empty();
+            $('#quotecountTxt').hide();
+            const pat = $('#inpQuote').val();
+            if(pat.length < 3) {
+                $('#txtWarn').show();
+                return;
+            }
+
+            // construct results contents
+            Handlebars.registerHelper('highlight', function(options) {
+                let txt = options.fn(this);
+                let pat = $('#inpQuote').val();
+                let index = 0;
+                let str = "";
+                while(true) {
+                    const nextIndex = txt.toUpperCase().indexOf(pat.toUpperCase(), index);
+                    if(nextIndex === -1)
+                        break;
+                    str += txt.substring(index, nextIndex) + '<b>'+txt.substring(nextIndex, nextIndex + pat.length)+'</b>';
+                    index = nextIndex + pat.length;
                 }
-
-                // construct results contents
-                Handlebars.registerHelper('highlight', function(options) {
-                    let txt = options.fn(this);
-                    let pat = $('#inpQuote').val();
-                    let index = 0;
-                    let str = "";
-                    while(true) {
-                        const nextIndex = txt.toUpperCase().indexOf(pat.toUpperCase(), index);
-                        if(nextIndex === -1)
-                            break;
-                        str += txt.substring(index, nextIndex) + '<b>'+txt.substring(nextIndex, nextIndex + pat.length)+'</b>';
-                        index = nextIndex + pat.length;
-                    }
-                    str += txt.substring(index);
-                    return str;
+                str += txt.substring(index);
+                return str;
+            });
+            $('#lstQuotes').html(Handlebars.compile($('#tmpSearch').html())({messages : quotes.filter(quote => quote.content.toUpperCase().includes(pat.toUpperCase()))}));
+            $('#lstQuotes button').each(function() {
+                $(this).on('click', () => {
+                    const win = window.open('?section=transcript&ep='+$(this).attr('data-date')+'&msg=msg'+$(this).attr('data-id'), '_blank');
+                    if(win)
+                        win.focus();
                 });
-                $('#lstQuotes').html(Handlebars.compile($('#tmpSearch').html())({messages : quotes.filter(quote => quote.content.toUpperCase().includes(pat.toUpperCase()))}));
-                $('#lstQuotes button').each(function() {
-                    $(this).on('click', () => {
-                        const win = window.open('?section=transcript&ep='+$(this).attr('data-date')+'&msg=msg'+$(this).attr('data-id'), '_blank');
-                        if(win)
-                            win.focus();
-                    });
-                });
-                // set result count
-                $('#quotecountTxt').text('Result count: ' + $('#lstQuotes').children().length).show();
-            };
+            });
+            // set result count
+            $('#quotecountTxt').text('Result count: ' + $('#lstQuotes').children().length).show();
+        };
 
-            // have both search button and enter on input apply search
-            $('#inpQuote').keyup(function(e){ if(e.keyCode === 13) updateList()});
-            $('#btnQuoteSearch').on("click", updateList);
-            refresh();
-        });
+        // have both search button and enter on input apply search
+        $('#inpQuote').keyup(function(e){ if(e.keyCode === 13) updateList()});
+        $('#btnQuoteSearch').on("click", updateList);
+        refresh();
     }
 </script>

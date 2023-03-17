@@ -12,14 +12,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "escape-string-regexp": "^1.0.5",
-    "express": "^4.18.2",
     "fuzzyset.js": "0.0.7",
     "gender-detection": "0.0.5",
     "puppeteer": "^1.7.0",
     "request": "^2.88.0",
-    "socket.io": "^2.1.1",
-    "stopword": "^0.1.10",
     "string-similarity": "^1.2.2",
     "wordcount": "^1.1.1"
   }

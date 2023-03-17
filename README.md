@@ -16,12 +16,12 @@ Search to see what your representatives have said in the past. How consistent ha
 - Beautified transcript layout (put a face to the speaker's name), search through the episode archive.
 - See word-clouds for each episode. 
 - Browse panelists; see their bio, appearance list, and search for individual quotes (and see the context in which they were said through transcript position linking).
-- See staistics summaries regarding political representation of the audience, and gender representation of both audience and panel (via tableau).
+- See statistics summaries regarding political representation of the audience, and gender representation of both audience and panel (via tableau).
 - Observe trends of word usage throughout the years and months of broadcasts.
 
 ## Usage:
-- ```npm install```
-- ```node server.js``` to start the express server, then visit localhost:8081/qanda.html
+- ```http-server``` in the /site directory ([install here](https://github.com/http-party/http-server)). A dummy server is used to avoid a CORS violation which would be encountered if directly opening qanda.html in the browser due to cdnjs script inclusions.
+- Then simply visit localhost:8080/qanda.html
 
 ## Screenshots:
 

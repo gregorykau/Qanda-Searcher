@@ -257,41 +257,6 @@ const request = require('request');
         }
     }
 
-    // page.goto('https://en.wikipedia.org/wiki/Members_of_the_Australian_Senate', {timeout : 0});
-    // await page.waitForSelector('.mw-parser-output');
-    // await page.evaluate(fs.readFileSync('jquery-3.3.1.min.js', 'utf8'));
-    //
-    // const senateUrls = await page.evaluate(() => { const _urls = []; $('.mw-parser-output > ul:nth-child(2) a').each(function(){ _urls.push($(this).attr('href'));}); return _urls; });
-    // const parliamentNames = [];
-    // for(let i = 0; i < senateUrls.length; i++) {
-    //     console.log(senateUrls[i]);
-    //     await page.goto('http://en.wikipedia.org' + senateUrls[i], {timeout: 0});
-    //     await page.evaluate(fs.readFileSync('jquery-3.3.1.min.js', 'utf8'));
-    //     const people = await page.evaluate(() => {
-    //         const people = [];
-    //         $('.wikitable').find('tr').each(function(){
-    //             const person = {};
-    //             $(this).find('td').each(function(idx){
-    //                 let txt = $(this).text().trim().split('[')[0];
-    //                 if('name' in person && 'party' in person)
-    //                     return;
-    //                 if(idx == 0) {
-    //                     person['name'] = txt;
-    //                 }
-    //                 else if($(this).text().trim().length) {
-    //                     txt = txt.split('/').pop();
-    //                     txt = txt.substring(0, txt.indexOf('[')).trim();
-    //                     person['party'] = txt;
-    //                 }
-    //             });
-    //             people.push(person);
-    //         });
-    //         return people;
-    //     });
-    //     console.log(JSON.stringify(people));
-    // }
-    // return;
-
     // save all the entries
     fs.writeFileSync('JSON/qanda.json', JSON.stringify({
         'entries': entries,

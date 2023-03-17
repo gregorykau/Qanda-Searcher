@@ -77,6 +77,37 @@
         // results for matches, {date, count}
         let results = null;
 
+        // request results for pattern
+        const getResults = () => {
+            const pat = $('#inpSearch').val().trim();
+            const modifiedPat = $('#checkPartial').is(':checked') ? pat : ('\\W+' + pat + '\\W+');
+
+            // ensure pattern length >=3
+            if(pat.length < 3) {
+                $('#txtWarn').text("Error, please enter a search term with at least three characters.").show();
+                return;
+            } else
+                $('#txtWarn').hide();
+
+            
+
+            const data = EPISODE_TEXT.map(ep => ({date: ep.date, count : (ep.txt.match(new RegExp(modifiedPat.toUpperCase(), 'g')) || []).length}));
+            results = data;
+
+            // ensure pattern has at least some matches
+            if (data.every(ep => ep.count === 0)) {
+                $('#txtWarn').text("No results, try another term.").show();
+                return;
+            }
+
+            // set results and refresh
+            $('#txtTerm').text("Search: "  +pat);
+            
+            refresh();
+        }
+
+
+
         // refresh display using results
         const refresh = () => {
             // ensure user has received results (performed at search)
@@ -163,32 +194,6 @@
                 .text("Frequency");
         };
 
-        // request results for pattern
-        const getResults = () => {
-            const pat = $('#inpSearch').val().trim();
-
-            // ensure pattern length >=3
-            if(pat.length < 3) {
-                $('#txtWarn').text("Error, please enter a search term with at least three characters.").show();
-                return;
-            } else
-                $('#txtWarn').hide();
-
-            // request results
-            socket.emit('getTrend',  $('#checkPartial').is(':checked') ? pat : (' ' + pat + ' '));
-            socket.on('getTrend', (data) => {
-                // ensure pattern has at least some matches
-                if (data.every(ep => ep.count === 0)) {
-                    $('#txtWarn').text("No results, try another term.").show();
-                    return;
-                }
-                // set results and refresh
-                results = data;
-                $('#txtTerm').text("Search: "  +pat);
-                refresh();
-            });
-        };
-
         // have bin slider refresh graph
         $('#sliderBin').slider({
             min:0,
@@ -199,6 +204,7 @@
                 refresh();
             }
         });
+
         // have button request results
         $('#btnTrend').on('click', () => getResults());
         // have input-enter do the same

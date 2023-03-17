@@ -30,14 +30,36 @@
 </div>
 
 <script>
+    
     function refresh() {
         $('#year').val(getQuery('year') || '2018'); $('#year').selectmenu('refresh');
         $('#month').val(getQuery('month') || 'All'); $('#month').selectmenu('refresh');
         const dateSearch = '/' + ($('#month').prop('selectedIndex') ? $('#month').prop('selectedIndex') + '/' : '') + $('#year').val().slice(2);
-        socket.emit('getEpisodes', dateSearch);
+
+        const entries = Object.values(JSONDATA.entries).filter(ep => ep.date.endsWith(dateSearch)).map(ep => ({
+            'title' : ep.title,
+            'date' : ep.date
+        }));
+
+        const userList = new List('divEps', {
+            valueNames: ['date', 'title'],
+            item: '<button type="button" class="btn btn-outline-dark" style="width: 100%; text-align: left">' +
+                '<h5 class="card-title title"></h5>' +
+                '<p><small class="text-muted date"></small></p>' +
+                '</button>'
+        }, []);
+        userList.clear();
+        userList.add(entries);
+        $('#divEps .list > button').each(function() {
+            $(this).on('click', () => {
+                const date = $(this).find('.date').text();
+                pushState(null,  null, '?section=transcript&ep=' + date);
+            });
+        });
+        pageReady();
     }
     function exit(){
-        socket.off('getEpisodes');
+
     }
     function enter(){
         $('#month').append(['All', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September',
@@ -51,25 +73,5 @@
         $('#year').on('selectmenuchange', () => refreshDates());
 
         refresh();
-
-        const userList = new List('divEps', {
-            valueNames: ['date', 'title'],
-            item: '<button type="button" class="btn btn-outline-dark" style="width: 100%; text-align: left">' +
-                '<h5 class="card-title title"></h5>' +
-                '<p><small class="text-muted date"></small></p>' +
-                '</button>'
-        }, []);
-
-        socket.on('getEpisodes', (data) => {
-            userList.clear();
-            userList.add(data.eps);
-            $('#divEps .list > button').each(function() {
-                $(this).on('click', () => {
-                    const date = $(this).find('.date').text();
-                    pushState(null,  null, '?section=transcript&ep=' + date);
-                });
-            });
-            pageReady();
-        });
     }
 </script>
