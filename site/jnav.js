@@ -1,6 +1,3 @@
-$.ajaxSetup({
-    cache: false
-});
 $('#divContentContainer').hide();
 $('#btnBack').hide();
 
